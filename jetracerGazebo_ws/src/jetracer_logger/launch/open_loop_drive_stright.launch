@@ -1,0 +1,6 @@
+<launch>
+
+  <node pkg="jetracer_logger" name="open_loop_drive_stright" type="open_loop_drive_stright.py" output="screen">
+  </node>
+
+</launch>

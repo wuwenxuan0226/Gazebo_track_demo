@@ -1,0 +1,9 @@
+<launch>
+
+  <node pkg="jetracer_line_detect" name="line_following_gazebo" type="line_following_gazebo.py" output="screen">
+  </node>
+
+  <node pkg="jetracer_line_detect" name="gazebo_control" type="gazebo_control.py">
+  </node>
+
+</launch>

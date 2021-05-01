@@ -1,0 +1,6 @@
+<launch>
+
+  <node pkg="jetracer_control" name="keyboard_control" type="keyboard_control.py" output="screen">
+  </node>
+
+</launch>

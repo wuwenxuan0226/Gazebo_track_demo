@@ -1,0 +1,470 @@
+<?xml version="1.0" ?>
+<robot name="jetracer" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+  <gazebo reference="link_chassis">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="link_back_left_wheel">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="link_back_left_axle">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="link_back_right_wheel">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="link_back_right_axle">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="link_front_left_wheel">
+    <material>Gazebo/Green</material>
+  </gazebo>
+  <gazebo reference="link_front_left_axle">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="link_front_right_wheel">
+    <material>Gazebo/Green</material>
+  </gazebo>
+  <gazebo reference="link_front_right_axle">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="camera_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="imu_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- camera -->
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="main_cam">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.2217305</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>360</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>60.0</updateRate>
+        <cameraName>camera1</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+  
+  <!--IMU sensor-->
+  <gazebo reference="imu_link">
+    <gravity>false</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>30.0</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <topicName>imu</topicName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>50.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+  
+  <link name="link_chassis">
+    <!-- pose and inertial -->
+    <pose>0 0 0 0 0 0</pose>
+    <inertial>
+      <mass value="1.03025"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!--mass * ( y*y  + z * z) / 12-->
+      <inertia ixx="0.00038634375" ixy="0" ixz="0" iyy="0.00461895417" iyz="0" izz="0.00485076042"/> 
+    </inertial>
+    <!-- body -->
+    <collision name="collision_chassis">
+      <geometry>
+        <box size="0.23 0.06 0.03"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.23 0.06 0.03"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+  </link> 
+  <!--wheels-->>
+  <link name="link_back_right_wheel">
+    <inertial>
+      <mass value="0.0361"/>
+      <origin rpy="0 -1.5707 -1.5707" xyz="0 0 0"/>
+      <inertia ixx="1.231311e-5" ixy="0" ixz="0" iyy="1.231311e-5" iyz="0" izz="0.0000208658"/> <!--small i cause error,0.5*m*R^2-->
+    </inertial>
+    <collision name="link_back_right_wheel_collision">
+      <origin rpy="0 -1.5707 -1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 -1.5707 -1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </visual>
+  </link>
+  
+  <joint name="joint_back_right_wheel" type="continuous">
+    <origin rpy="0 0 0" xyz="0.0 -0.015 0.0"/>
+    <child link="link_back_right_wheel"/>
+    <parent link="link_back_right_axle"/>
+    <axis rpy="0 0 0" xyz="0 1 0"/>
+    <limit effort="0.07" velocity="56.176"/>
+    <joint_properties damping="0.01" friction="0.6"/>
+  </joint>
+
+  <link name="link_back_right_axle">
+    <inertial>
+      <mass value="1e-5"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    <collision name="link_front_left_axle_collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="joint_back_right_axle" type="revolute">
+    <origin rpy="0 0 0" xyz="-0.075 -0.07 0.0"/>
+    <child link="link_back_right_axle"/>
+    <parent link="link_chassis"/>
+    <axis rpy="0 0 0" xyz="0 0 -1"/>
+    <limit lower="0" upper="0"
+          effort="0" velocity="0"/>
+    <joint_properties damping="0.01" friction="0.3"/>
+  </joint>
+
+  <link name="link_front_right_wheel">
+    <inertial>
+      <mass value="0.0361"/>
+      <origin rpy="0 -1.5707 -1.5707" xyz="0 0 0"/>
+      <inertia ixx="1.231311e-5" ixy="0" ixz="0" iyy="1.231311e-5" iyz="0" izz="0.0000208658"/> <!--ixx=iyy=mass*(L^2+3*R^2)/12;izz=mass*R*R/2-->>
+    </inertial>
+    <collision name="link_front_right_wheel_collision">
+      <origin rpy="0 -1.5707 -1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 -1.5707 -1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="joint_front_right_wheel" type="continuous">
+    <origin rpy="0 0 0" xyz="0 -0.015 0"/>
+    <child link="link_front_right_wheel"/>
+    <parent link="link_front_right_axle"/>
+    <axis rpy="0 0 0" xyz="0 1 0"/>
+    <limit effort="0.07" velocity="56.176"/>
+    <joint_properties damping="0.01" friction="0.6"/>
+  </joint>
+
+  <link name="link_front_right_axle">
+    <inertial>
+      <mass value="1e-5"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    <collision name="link_front_left_axle_collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="joint_front_right_axle" type="revolute">
+    <origin rpy="0 0 0" xyz="0.075 -0.06 0.0"/>
+    <child link="link_front_right_axle"/>
+    <parent link="link_chassis"/>
+    <axis rpy="0 0 0" xyz="0 0 -1"/>
+    <limit lower="-0.349" upper="0.349"
+          effort="30" velocity="1.396"/>
+    <joint_properties damping="0.01" friction="0.3"/>
+  </joint>
+
+  <link name="link_back_left_wheel">
+    <inertial>
+      <mass value="0.0361"/>
+      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <inertia ixx="1.231311e-5" ixy="0" ixz="0" iyy="1.231311e-5" iyz="0" izz="0.0000208658"/>
+    </inertial>
+    <collision name="link_back_left_wheel_collision">
+      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </visual>
+  </link>
+  
+  <joint name="joint_back_left_wheel" type="continuous">
+    <origin rpy="0 0 0" xyz="0.0 0.015 0.0"/>
+    <child link="link_back_left_wheel"/>
+    <parent link="link_back_left_axle"/>
+    <axis rpy="0 0 0" xyz="0 1 0"/>
+    <limit effort="0.07" velocity="56.176"/>
+    <joint_properties damping="0.01" friction="0.6"/>
+  </joint>
+
+  <link name="link_back_left_axle">
+    <inertial>
+      <mass value="1e-5"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    <collision name="link_front_left_axle_collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="joint_back_left_axle" type="revolute">
+    <origin rpy="0 0 0" xyz="-0.075 0.07 0.0"/>
+    <child link="link_back_left_axle"/>
+    <parent link="link_chassis"/>
+    <axis rpy="0 0 0" xyz="0 0 -1"/>
+    <limit lower="0" upper="0"
+          effort="0" velocity="0"/>
+    <joint_properties damping="0.01" friction="0.3"/>
+  </joint>
+
+  <link name="link_front_left_wheel">
+    <inertial>
+      <mass value="0.0361"/>
+      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <inertia ixx="1.231311e-5" ixy="0" ixz="0" iyy="1.231311e-5" iyz="0" izz="0.0000208658"/>
+    </inertial>
+    <collision name="link_front_left_wheel_collision">
+      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.025" radius="0.034"/>
+      </geometry>
+    </visual>
+  </link>
+  
+  <joint name="joint_front_left_wheel" type="continuous">
+    <origin rpy="0 0 0" xyz="0 0.015 0"/>
+    <child link="link_front_left_wheel"/>
+    <parent link="link_front_left_axle"/>
+    <axis rpy="0 0 0" xyz="0 1 0"/>
+    <limit effort="0.07" velocity="56.176"/> 
+    <joint_properties damping="0.01" friction="0.6"/>
+  </joint>
+
+  <link name="link_front_left_axle">
+    <inertial>
+      <mass value="1e-5"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    <collision name="link_front_left_axle_collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.005" radius="0.002"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="joint_front_left_axle" type="revolute">
+    <origin rpy="0 0 0" xyz="0.075 0.06 0.0"/>
+    <child link="link_front_left_axle"/>
+    <parent link="link_chassis"/>
+    <axis rpy="0 0 0" xyz="0 0 1"/>
+    <limit lower="-0.349" upper="0.349"
+           effort="30" velocity="1.396"/>
+    <joint_properties damping="0.01" friction="0.3"/>
+  </joint>
+
+  <!-- Camera -->
+  <link name="camera_link">
+	<inertial>
+		<mass value = "1e-5"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+	</inertial>
+    <collision name = "camera_link_collision">
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+    		<box size="0.02 0.02 0.02"/>
+      	</geometry>
+    </collision>
+    <visual>
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+    		<box size="0.02 0.02 0.02"/>
+      	</geometry>
+     </visual>
+  </link>
+
+  <!-- IMU Sensor -->
+  <link name="imu_link">
+	<inertial>
+		<mass value = "1e-5"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+	</inertial>
+    <collision name = "camera_link_collision">
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+    		<box size="0.01 0.01 0.01"/>
+      	</geometry>
+    </collision>
+    <visual>
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+    		<box size="0.01 0.01 0.01"/>
+      	</geometry>
+     </visual>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+	  <origin xyz="0.09 0 0.09" rpy="0 0.5235987756 0"/>
+	  <child link="camera_link"/>
+    <parent link="link_chassis"/>
+    <axis rpy = "0 0 0" xyz="0 1 0" />
+  </joint>
+
+  <joint name="imu_joint" type="fixed">
+	  <origin xyz="-0.07 0 0.0193" rpy="0 0 0"/>
+	  <child link="imu_link"/>
+    <parent link="link_chassis"/>
+    <axis rpy = "0 0 0" xyz="0 1 0" />
+  </joint>
+
+  <transmission name = "joint_back_left_wheel_trans">
+  	<type> transmission_interface/SimpleTransmission </type>
+        <joint name = "joint_back_left_wheel">
+        	<hardwareInterface> hardware_interface/VelocityJointInterface </hardwareInterface> 
+        </joint>
+        <actuator name = "joint_back_left_wheel_motor">
+                <hardwareInterface> hardware_interface/VelocityJointInterface </hardwareInterface> 
+  		<mechanicalReduction>1</mechanicalReduction>
+	</actuator>
+  </transmission>
+
+  <transmission name = "joint_back_right_wheel_trans">
+  	<type> transmission_interface/SimpleTransmission </type>
+        <joint name = "joint_back_right_wheel">
+        	<hardwareInterface> hardware_interface/VelocityJointInterface </hardwareInterface> 
+        </joint>
+        <actuator name = "joint_back_right_wheel_motor">
+                <hardwareInterface> hardware_interface/VelocityJointInterface </hardwareInterface> 
+  		<mechanicalReduction>1</mechanicalReduction>
+	</actuator>
+  </transmission>
+
+  <transmission name = "joint_front_left_axle_trans">
+  	<type> transmission_interface/SimpleTransmission </type>
+        <joint name = "joint_front_left_axle">
+        	<hardwareInterface> hardware_interface/PositionJointInterface </hardwareInterface> 
+        </joint>
+        <actuator name = "joint_front_left_axle_steering_position">
+                <hardwareInterface> hardware_interface/PositionJointInterface </hardwareInterface> 
+  		<mechanicalReduction>1</mechanicalReduction>
+	</actuator>
+  </transmission>
+
+  <transmission name = "joint_front_right_axle_trans">
+  	<type> transmission_interface/SimpleTransmission </type>
+        <joint name = "joint_front_right_axle">
+        	<hardwareInterface> hardware_interface/PositionJointInterface </hardwareInterface> 
+        </joint>
+        <actuator name = "joint_front_right_axle_steering_position">
+                <hardwareInterface> hardware_interface/PositionJointInterface </hardwareInterface> 
+  		<mechanicalReduction>1</mechanicalReduction>
+	</actuator>
+  </transmission>
+
+
+<gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+    <robotNamespace>/jetracer</robotNamespace>
+  </plugin>
+</gazebo>
+</robot>
+
+

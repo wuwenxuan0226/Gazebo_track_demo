@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+  <group ns ="/jetracer">
+
+  	<param name="robot_description" command="cat '$(find jetracer_description)/urdf/jetracer.xacro'"/>
+
+	<arg name = "x" default = "0"/>
+	<arg name = "y" default = "0"/>
+	<arg name = "z" default = "0.2"/>
+
+        <!-- Spawn the robot in gazebo -->
+	<node name = "jetracer_spawn" pkg = "gazebo_ros" type = "spawn_model" output = "screen" args = "-urdf -param robot_description -model jetracer -x $(arg x) -y $(arg y) -z $(arg z)"/>
+        
+        <!-- Load Controllers -->
+        <rosparam command = "load" file = "$(find jetracer_description)/config/joints.yaml"/>
+        
+      <node name="controller_spawner" 
+      pkg="controller_manager" 
+      type="spawner" respawn="false"
+      output="screen" 
+      ns="/jetracer" 
+      args="joint_state_controller 
+            joint_back_left_wheel_velocity_controller joint_back_right_wheel_velocity_controller 
+            joint_front_left_axle_steering_controller joint_front_right_axle_steering_controller"/>
+  </group>
+
+</launch>

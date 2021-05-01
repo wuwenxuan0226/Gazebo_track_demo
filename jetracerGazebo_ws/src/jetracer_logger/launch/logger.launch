@@ -1,0 +1,6 @@
+<launch>
+
+  <node pkg="jetracer_logger" name="logger" type="logger.py" output="screen">
+  </node>
+
+</launch>
