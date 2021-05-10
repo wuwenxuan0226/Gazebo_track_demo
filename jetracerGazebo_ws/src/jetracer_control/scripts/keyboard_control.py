@@ -14,7 +14,7 @@ def keys():
 
     lat = 0
     lon = 0
-    scale = 56.176 #rad/s 1.91m/s r=0.034m
+    scale = 50 #rad/s 1.7m/s r=0.034m
     L = 15 #wheelbase (in cm. all of them)
     R = 50 #turning radius
     W = 15 #track width
